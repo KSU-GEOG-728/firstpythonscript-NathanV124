@@ -16,18 +16,27 @@ arcpy.env.overwriteOutput = True
 # Set current workspace
 arcpy.env.workspace= "C:/Users/ntverrill/Documents/GitHub/firstpythonscript-NathanV124/GitHub-FirstPythonScript/GitHub-FirstPythonScript.gdb"
 
+#this selects the region we want to work with. This case it's the Flint hills.
 selectRegion = arcpy.management.SelectLayerByAttribute("ks_ecoregions", "NEW_SELECTION","US_L3NAME = 'Flint Hills'")
 
-createBuffer = arcpy.analysis.Buffer('ks_ecoregions', 'buffer_area', "10 kilometers" )
+#Creates a buffer around the selected region
+createBuffer = arcpy.analysis.Buffer(selectRegion, 'buffer_area', "10 kilometers" )
 
+#Clips the buffer around the region into it's own layer
 createClip = arcpy.analysis.Clip('ks_major_rivers', 'buffer_area', 'clipped_area')
 
+#creates a variable equal to 0
 total_length_meters = 0
+
+#Iterates through the cursor and creates a sum of all of the rows together. 
 with arcpy.da.SearchCursor('clipped_area', ['shape@LENGTH']) as cursor:
+
+#loops for each row    
     for row in cursor:
         total_length_meters += row[0]
 
+#Converts meters to miles 
 total_length_miles =  total_length_meters / 1609.34
 
-print(total_length_miles)
-print(total_length_meters)
+#prints total number of miles
+print(f"Total miles: {total_length_miles}")
