@@ -14,9 +14,20 @@ import arcpy
 arcpy.env.overwriteOutput = True
 
 # Set current workspace
-acrpy.env.workspace= "C:/Users/ntverrill/Documents/GitHub/firstpythonscript-NathanV124/GitHub-FirstPythonScript.gdb"
+arcpy.env.workspace= "C:/Users/ntverrill/Documents/GitHub/firstpythonscript-NathanV124/GitHub-FirstPythonScript/GitHub-FirstPythonScript.gdb"
 
 selectRegion = arcpy.management.SelectLayerByAttribute("ks_ecoregions", "NEW_SELECTION","US_L3NAME = 'Flint Hills'")
+
 createBuffer = arcpy.analysis.Buffer('ks_ecoregions', 'buffer_area', "10 kilometers" )
+
 createClip = arcpy.analysis.Clip('ks_major_rivers', 'buffer_area', 'clipped_area')
-arcpy.management.CalculateField('clipped_area', 'TotalLength', '!shape.length!')
+
+total_length_meters = 0
+with arcpy.da.SearchCursor('clipped_area', ['shape@LENGTH']) as cursor:
+    for row in cursor:
+        total_length_meters += row[0]
+
+total_length_miles =  total_length_meters / 1609.34
+
+print(total_length_miles)
+print(total_length_meters)
