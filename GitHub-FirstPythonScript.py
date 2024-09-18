@@ -20,10 +20,17 @@ arcpy.env.workspace= "C:/Users/ntverrill/Documents/GitHub/firstpythonscript-Nath
 selectRegion = arcpy.management.SelectLayerByAttribute("ks_ecoregions", "NEW_SELECTION","US_L3NAME = 'Flint Hills'")
 
 #Creates a buffer around the selected region
-createBuffer = arcpy.analysis.Buffer(selectRegion, 'buffer_area', "10 kilometers" )
+arcpy.analysis.Buffer(selectRegion, 'buffer_area', "10 kilometers" )
 
 #Clips the buffer around the region into it's own layer
-createClip = arcpy.analysis.Clip('ks_major_rivers', 'buffer_area', 'clipped_area')
+arcpy.analysis.Clip('ks_major_rivers', 'buffer_area', 'clipped_area')
+
+# Alternative compute stream length in miles and sum new length in output table
+arcpy.AddGeometryAttributes_management("clipped_area", "LENGTH", "MILES_US")
+arcpy.Statistics_analysis("clipped_area", "outStats", [["LENGTH", "SUM"]])
+
+
+# Remaining lines are the original script
 
 #creates a variable equal to 0
 total_length_meters = 0
