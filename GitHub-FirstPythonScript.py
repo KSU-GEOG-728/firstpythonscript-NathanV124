@@ -3,9 +3,9 @@
 
 """
     File name: GitHub-FirstPythonScript.py
-    Author: ENTER YOUR  NAME
-    Description:  ENTER BRIEF DESCRIPTION
-    Date created: ENTER TODAY'S DATE in MM/DD/YYYY FORMAT
+    Author: Nathan Verrill
+    Description:  This script calculates the total stream miles for all streams in the Flint Hills.
+    Date created: 09/11/2024
     Python Version: 3.9.16
 """
 
@@ -14,3 +14,36 @@ import arcpy
 arcpy.env.overwriteOutput = True
 
 # Set current workspace
+arcpy.env.workspace= "C:/Users/ntverrill/Documents/GitHub/firstpythonscript-NathanV124/GitHub-FirstPythonScript/GitHub-FirstPythonScript.gdb"
+
+#this selects the region we want to work with. This case it's the Flint hills.
+selectRegion = arcpy.management.SelectLayerByAttribute("ks_ecoregions", "NEW_SELECTION","US_L3NAME = 'Flint Hills'")
+
+#Creates a buffer around the selected region
+arcpy.analysis.Buffer(selectRegion, 'buffer_area', "10 kilometers" )
+
+#Clips the buffer around the region into it's own layer
+arcpy.analysis.Clip('ks_major_rivers', 'buffer_area', 'clipped_area')
+
+# Alternative compute stream length in miles and sum new length in output table
+arcpy.AddGeometryAttributes_management("clipped_area", "LENGTH", "MILES_US")
+arcpy.Statistics_analysis("clipped_area", "outStats", [["LENGTH", "SUM"]])
+
+
+# Remaining lines are the original script
+
+#creates a variable equal to 0
+total_length_meters = 0
+
+#Iterates through the cursor and creates a sum of all of the rows together. 
+with arcpy.da.SearchCursor('clipped_area', ['shape@LENGTH']) as cursor:
+
+#loops for each row    
+    for row in cursor:
+        total_length_meters += row[0]
+
+#Converts meters to miles 
+total_length_miles =  total_length_meters / 1609.34
+
+#prints total number of miles
+print(f"Total miles: {total_length_miles}")
